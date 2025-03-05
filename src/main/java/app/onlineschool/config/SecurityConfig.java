@@ -1,5 +1,6 @@
 package app.onlineschool.config;
 
+import app.onlineschool.exception.CustomAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userService;
 
+    @Autowired
+    private CustomAuthenticationFailureHandler failureHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -37,7 +41,7 @@ public class SecurityConfig {
                         .loginPage("/login") // Custom login page
                         .loginProcessingUrl("/login") // Login processing URL
                         .defaultSuccessUrl("/courses", true) // Redirect after successful login
-                        .failureUrl("/login?error=true")
+                        .failureHandler(failureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout

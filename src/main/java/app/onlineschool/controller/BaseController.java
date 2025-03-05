@@ -30,9 +30,11 @@ public class BaseController {
     }
 
     @GetMapping("/login")
-    String login(@RequestParam(value = "error", required = false) String error, Model model) {
+    String login(@RequestParam(value = "error", required = false) String error,
+                 @RequestParam(value = "username", required = false) String username, Model model) {
         RegisterLoginPage page = new RegisterLoginPage();
         if (error != null) {
+            page.setUsername(username);
             page.addError("Invalid username or password");
         }
         model.addAttribute("page", page);
