@@ -10,9 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -50,6 +48,12 @@ public class User implements BaseEntity, UserDetails {
     )
     private List<Course> courses = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "user_course_progress", joinColumns = @JoinColumn(name = "user_id"))
+    @MapKeyColumn(name = "course_id")
+//    @Column(name = "completed_lessons")
+    private Map<Long, CourseProgress> courseProgress = new HashMap<>();
+
     @Override
     public String getPassword() {
         return passwordDigest;
@@ -83,5 +87,13 @@ public class User implements BaseEntity, UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+
+    @Embeddable
+    @Getter
+    @Setter
+    public static class CourseProgress {
+        private int completedLessons;
+        private boolean isFinished;
     }
 }

@@ -23,6 +23,9 @@ public class Course {
     @Column(unique = true)
     private String title;
 
+    @NotBlank
+    private String shortDescription;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Lesson> lessons = new ArrayList<>();
 

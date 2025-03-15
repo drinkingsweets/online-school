@@ -55,18 +55,18 @@ public class BaseController {
                         @RequestParam String passwordConfirmation, Model model) {
 
         boolean isUnique = userRepository.findByUsername(username).isEmpty();
-        if (password.equals(passwordConfirmation) && isUnique) {
+        if (password.equals(passwordConfirmation) && isUnique) { // checks if passwords match and username is unique
             User user = new User();
             user.setFullName(fullName);
             user.setUsername(username);
             user.setPasswordDigest(passwordEncoder.encode(password));
-            user.setRole(0);
+            user.setRole(0); // sets the role to user
             userRepository.save(user);
             return "redirect:/login";
         } else {
             RegisterLoginPage rlp = new RegisterLoginPage();
             if (!isUnique) rlp.addError("This username is taken");
-            if (!password.equals(passwordConfirmation)) rlp.addError("Passwords don't match");
+            if (!password.equals(passwordConfirmation)) rlp.addError("Passwords don't match"); // showing errors
             rlp.setFullName(fullName);
 
             model.addAttribute("page", rlp);
@@ -74,23 +74,8 @@ public class BaseController {
         }
     }
 
-//    @PostMapping("/login")
-//    String performLogin(@RequestParam String username,
-//                        @RequestParam String password, Model model) {
-//        Optional<User> user = userRepository.findByUsername(username);
-//        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPasswordDigest())) {
-//            return "redirect:/courses";
-//        }
-//
-//        RegisterLoginPage rlp = new RegisterLoginPage();
-//
-//        if (user.isEmpty()) {
-//            rlp.addError("User doesn't exist");
-//        } else if (!passwordEncoder.matches(password, user.get().getPasswordDigest())) {
-//            rlp.addError("Invalid password");
-//        }
-//        rlp.setUsername(username);
-//        model.addAttribute("page", rlp);
-//        return "page/login";
-//    }
+    @GetMapping("/home")
+    String home() {
+        return "contents/buttons-welcome";
+    }
 }

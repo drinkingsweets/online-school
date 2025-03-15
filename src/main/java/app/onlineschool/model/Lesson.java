@@ -18,12 +18,14 @@ public class Lesson {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false) // Explicitly define the foreign key column
-
     private Course course;
 
     @NotBlank
     private String title;
 
-    @NotBlank
+//    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
+
+    private int lessonNumber;
 }

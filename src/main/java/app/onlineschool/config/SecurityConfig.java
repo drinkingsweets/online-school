@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login") // Custom login page
                         .loginProcessingUrl("/login") // Login processing URL
-                        .defaultSuccessUrl("/courses", true) // Redirect after successful login
+                        .defaultSuccessUrl("/home", true) // Redirect after successful login
                         .failureHandler(failureHandler)
                         .permitAll()
                 )
