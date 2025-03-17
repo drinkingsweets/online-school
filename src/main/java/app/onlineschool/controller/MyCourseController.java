@@ -48,7 +48,13 @@ public class MyCourseController {
         if (user.getCourses().contains(courseRepository.findById(id).get())) {
             int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
             model.addAttribute("currentLesson", lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get());
+
+            //tests
+            System.out.println("from db:");
+            System.out.println(lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get().getContent());
+            System.out.println("\n\n\nfrom service:");
             System.out.println(markdownService.convertMarkdownToHtml(lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get().getContent()));
+            //tests
             model.addAttribute("markdownService", markdownService);
             return "contents/mycourses-lesson";
         }

@@ -8,6 +8,16 @@
     <title>Online School</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+
+
+    <script>hljs.highlightAll();</script>
+
 </head>
 <body class="bg-gray-100 text-gray-900 flex">
 <!-- Sidebar -->
@@ -45,9 +55,9 @@
 </div>
 
 <!-- Main Content -->
-<main id="mainContent" class="flex-1 ml-16 p-4 transition-all duration-300">
+<div id="mainContent" class="flex-1 ml-16 p-4 transition-all duration-300">
     ${content}
-</main>
+</div>
 
 <script>
     function toggleSidebar() {

@@ -121,3 +121,92 @@ button:active {
     0 0.2em 0 0 #dcdcdc, 0 0.225em 0 0 #cacaca, 0 0.225em 0.375em 0 #cecece;
 }
 
+.text-gray-700 ul {
+    list-style-type: disc; /* Маркеры */
+    padding-left: 1.5rem;
+}
+
+.text-gray-700 ol {
+    list-style-type: decimal; /* Нумерация */
+    padding-left: 1.5rem;
+}
+
+.text-gray-700 h1 {
+    font-size: 2rem; /* 32px */
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.text-gray-700 h2 {
+    font-size: 1.75rem; /* 28px */
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.text-gray-700 h3 {
+    font-size: 1.5rem; /* 24px */
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.text-gray-700 h4 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.text-gray-700 h5 {
+    font-size: 1.125rem; /* 18px */
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.text-gray-700 h6 {
+    font-size: 1rem; /* 16px */
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Стили для blockquote */
+.text-gray-700 blockquote {
+    border-left: 4px solid #f59e0b; /* Оранжевый акцент */
+    padding-left: 1rem;
+    color: #6b7280; /* Серый текст */
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+/* Стили для inline code */
+.text-gray-700 code {
+    background-color: #f3f4f6; /* Светло-серый фон */
+    color: #d63384; /* Розовый цвет текста */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9em;
+}
+
+/* Стили для code blocks */
+.text-gray-700 pre {
+    background-color: #1e293b; /* Тёмно-синий фон */
+    color: #e5e7eb; /* Светлый текст */
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Улучшенный стиль для pre > code */
+.text-gray-700 pre code {
+    font-family: "Fira Code", monospace;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #ffffff;
+    display: block;
+    overflow-x: auto;
+}
+
+
+
