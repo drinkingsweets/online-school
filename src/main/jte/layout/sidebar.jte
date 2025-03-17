@@ -11,7 +11,8 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex">
 <!-- Sidebar -->
-<div id="sidebar" class="bg-white h-screen p-4 transition-all duration-300 w-16 md:w-64 flex flex-col shadow-lg">
+<div id="sidebar"
+     class="bg-white h-screen min-h-screen p-4 transition-all duration-300 w-16 flex flex-col shadow-lg fixed top-0 left-0 z-50">
     <button onclick="toggleSidebar()" class="mb-6 self-end">
         <span id="toggleIcon">&#9776;</span>
     </button>
@@ -20,49 +21,64 @@
             <li>
                 <a href="/" class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
                     <span class="text-xl">🏠</span>
-                    <span class="hidden md:inline">Главная</span>
+                    <span class="text-xs hidden">Главная</span>
                 </a>
             </li>
             <li>
                 <a href="/profile" class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
                     <span class="text-xl">👤</span>
-                    <span class="hidden md:inline">Мой профиль</span>
+                    <span class="text-xs hidden">Мой профиль</span>
                 </a>
             </li>
             <li>
                 <a href="/mycourses" class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
                     <span class="text-xl">📚</span>
-                    <span class="hidden md:inline">Мои курсы</span>
+                    <span class="text-xs hidden">Мои курсы</span>
                 </a>
             </li>
         </ul>
     </nav>
     <a href="/logout" class="mt-auto flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
         <span class="text-xl">🚪</span>
-        <span class="hidden md:inline">Выход</span>
+        <span class="text-xs hidden">Выход</span>
     </a>
 </div>
 
 <!-- Main Content -->
-<main class="flex-1 p-10">
+<main id="mainContent" class="flex-1 ml-16 p-4 transition-all duration-300">
     ${content}
 </main>
-
 
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
-        const schoolTitle = document.getElementById('schoolTitle');
-        sidebar.classList.toggle('w-16');
-        sidebar.classList.toggle('md:w-64');
-        const spans = sidebar.querySelectorAll('span.hidden');
-        spans.forEach(span => span.classList.toggle('md:inline'));
+        const mainContent = document.getElementById('mainContent');
+        const spans = sidebar.querySelectorAll('nav a span.text-xs');
 
-        // Show or hide the "Online school" title based on the sidebar width
-        if (sidebar.classList.contains('w-16')) {
-            schoolTitle.classList.add('hidden');
+        // Determine current state: if sidebar is collapsed it has class w-16
+        const isCollapsed = sidebar.classList.contains('w-16');
+
+        // Toggle sidebar and main content width classes
+        sidebar.classList.toggle('w-16');
+        sidebar.classList.toggle('w-64');
+        mainContent.classList.toggle('ml-16');
+        mainContent.classList.toggle('ml-64');
+
+        if (isCollapsed) {
+            // If expanding, wait for transition end on width property then show text
+            sidebar.addEventListener('transitionend', function handler(e) {
+                if (e.propertyName === 'width') {
+                    spans.forEach(span => {
+                        span.classList.remove('hidden');
+                    });
+                    sidebar.removeEventListener('transitionend', handler);
+                }
+            }, {once: true});
         } else {
-            schoolTitle.classList.remove('hidden');
+            // If collapsing, hide text immediately
+            spans.forEach(span => {
+                span.classList.add('hidden');
+            });
         }
     }
 </script>

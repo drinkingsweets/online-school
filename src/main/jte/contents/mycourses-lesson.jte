@@ -1,4 +1,6 @@
 @import app.onlineschool.model.Lesson
+@import app.onlineschool.service.MarkdownService
+@param MarkdownService markdownService
 @param Lesson currentLesson
 
 @template.layout.sidebar(
@@ -14,7 +16,7 @@ content = @`
 
         <!-- Lesson Content -->
         <section class="mb-6">
-            <p class="text-gray-700">${currentLesson.getContent()}</p>
+            <div class="text-gray-700">$unsafe{(markdownService.convertMarkdownToHtml(currentLesson.getContent()))}</div>
         </section>
 
         <!-- Navigation Buttons -->

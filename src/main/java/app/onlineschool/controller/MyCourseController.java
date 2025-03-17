@@ -5,6 +5,7 @@ import app.onlineschool.model.User;
 import app.onlineschool.repositoty.CourseRepository;
 import app.onlineschool.repositoty.LessonRepository;
 import app.onlineschool.repositoty.UserRepository;
+import app.onlineschool.service.MarkdownService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,9 @@ public class MyCourseController {
     @Autowired
     LessonRepository lessonRepository;
 
+    @Autowired
+    MarkdownService markdownService;
+
     @GetMapping
     String index(Model model, Principal principal) {
         // showing all courses
@@ -44,6 +48,8 @@ public class MyCourseController {
         if (user.getCourses().contains(courseRepository.findById(id).get())) {
             int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
             model.addAttribute("currentLesson", lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get());
+            System.out.println(markdownService.convertMarkdownToHtml(lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get().getContent()));
+            model.addAttribute("markdownService", markdownService);
             return "contents/mycourses-lesson";
         }
         return "redirect:/courses" + id;

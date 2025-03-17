@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -75,7 +76,9 @@ public class BaseController {
     }
 
     @GetMapping("/home")
-    String home() {
+    String home(Model model, Principal principal) {
+        model.addAttribute("isAdmin",
+                userRepository.findByUsername(principal.getName()).get().getRole() == 1);
         return "contents/buttons-welcome";
     }
 }

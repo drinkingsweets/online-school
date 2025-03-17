@@ -30,6 +30,7 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.0")
     implementation("gg.jte:jte:3.1.12")
     implementation("gg.jte:jte-spring-boot-starter-3:3.1.12")
     compileOnly("org.projectlombok:lombok")
@@ -37,7 +38,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.pegdown:pegdown:1.6.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
