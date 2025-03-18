@@ -105,4 +105,6 @@ public class MyCourseController {
         }
         return "redirect:/courses/" + id;
     }
+
+    //TODO add admin interface for adding lessons
 }

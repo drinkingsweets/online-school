@@ -28,7 +28,7 @@ public class BaseController {
     @GetMapping
     String index() {
         return "page/welcome";
-    }
+    } // TODO add top courses based on popularity
 
     @GetMapping("/login")
     String login(@RequestParam(value = "error", required = false) String error,
@@ -62,6 +62,7 @@ public class BaseController {
             user.setUsername(username);
             user.setPasswordDigest(passwordEncoder.encode(password));
             user.setRole(0); // sets the role to user
+            user.setPfpLink("https://i.pinimg.com/736x/8b/db/8e/8bdb8e8a536946dbe616ee509b7fb435.jpg");
             userRepository.save(user);
             return "redirect:/login";
         } else {

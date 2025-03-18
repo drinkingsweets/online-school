@@ -55,4 +55,6 @@ public class CourseController {
         return "redirect:/courses/" + id;
     }
 
+    //TODO make a search bar for courses
+
 }
