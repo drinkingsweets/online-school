@@ -54,6 +54,8 @@ public class User implements BaseEntity, UserDetails {
 //    @Column(name = "completed_lessons")
     private Map<Long, CourseProgress> courseProgress = new HashMap<>();
 
+    private String pfpLink;
+
     @Override
     public String getPassword() {
         return passwordDigest;
