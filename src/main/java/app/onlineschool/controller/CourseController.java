@@ -1,15 +1,13 @@
 package app.onlineschool.controller;
 
+import app.onlineschool.model.Course;
 import app.onlineschool.model.User;
 import app.onlineschool.repositoty.CourseRepository;
 import app.onlineschool.repositoty.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -56,5 +54,26 @@ public class CourseController {
     }
 
     //TODO make a search bar for courses
+
+    @GetMapping("/create")
+    String createCourse(Principal principal) {
+        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+            return "contents/courses-create";
+        }
+        return "redirect:/courses";
+    }
+
+    @PostMapping("/create")
+    String createCoursePost(@RequestParam String title,
+                            @RequestParam String description,
+                            Principal principal) {
+        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+            Course course = new Course();
+            course.setTitle(title);
+            course.setShortDescription(description);
+            courseRepository.save(course); // TODO maybe show blank page to write lessons?
+        }
+        return "redirect:/courses";
+    }
 
 }
