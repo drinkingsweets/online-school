@@ -2,6 +2,7 @@
 @import app.onlineschool.model.Lesson
 @param Course course
 @param boolean isAdded
+@param boolean isAdmin
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,6 +38,18 @@
         <button class="bg-orange-200 text-gray-700 px-6 py-2 rounded-lg cursor-not-allowed">
             Added
         </button>
+        @endif
+        @if (isAdmin)
+        <form action="/courses/${course.getId()}/${course.getLessons()
+                             .stream()
+                             .mapToInt(Lesson::getLessonNumber)
+                             .max()
+                             .orElse(1)}/edit" method="get">
+            <input type="hidden" name="courseId" value="${course.getId()}"/>
+            <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition">
+                Edit course
+            </button>
+        </form>
         @endif
 
         <!-- Course Plan -->
