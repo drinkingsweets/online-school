@@ -8,6 +8,7 @@ import app.onlineschool.model.User;
 import app.onlineschool.repositoty.CourseRepository;
 import app.onlineschool.repositoty.LessonRepository;
 import app.onlineschool.repositoty.UserRepository;
+import app.onlineschool.service.CustomUserDetailsService;
 import app.onlineschool.service.MarkdownService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,8 @@ public class CourseController {
     private LessonRepository lessonRepository;
     @Autowired
     private MarkdownService markdownService;
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
     @GetMapping
     String index(Model model) {
@@ -148,7 +151,8 @@ public class CourseController {
             Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNum).get();
             lesson.setTitle(title);
             lesson.setContent(content);
-            lessonRepository.save(lesson); // TODO set isFinished on all users to false
+            lessonRepository.save(lesson);
+            customUserDetailsService.resetCourseProgressForUsers(id);
 
             return "redirect:/courses/" + id + "/" + lessonNum + "/preview";
         }

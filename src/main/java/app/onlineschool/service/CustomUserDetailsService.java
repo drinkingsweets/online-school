@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsManager {
 
@@ -33,6 +35,19 @@ public class CustomUserDetailsService implements UserDetailsManager {
         user.setUsername(userData.getUsername());
         user.setPasswordDigest(passwordEncoder.encode(userData.getPassword()));
         userRepository.save(user);
+    }
+
+    public void resetCourseProgressForUsers(Long courseId) {
+        List<User> users = userRepository.findUsersByCourseId(courseId);
+
+        for (User user: users) {
+            User.CourseProgress progress = user.getCourseProgress().get(courseId);
+            if (progress != null) {
+                progress.setFinished(false);
+            }
+        }
+
+        userRepository.saveAll(users);
     }
 
     @Override
