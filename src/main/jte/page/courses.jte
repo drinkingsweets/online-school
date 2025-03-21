@@ -18,9 +18,20 @@
     <h1 class="text-3xl font-bold">Online School</h1>
 </header>
 
+<!-- Search Section -->
+<section class="p-10">
+    <form action="/courses" method="post" class="flex items-center space-x-2 mb-0">
+        <label for="startDate" class="text-gray-700">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" class="p-2 border border-gray-300 rounded-lg">
+        <label for="endDate" class="text-gray-700">End Date:</label>
+        <input type="date" id="endDate" name="endDate" class="p-2 border border-gray-300 rounded-lg">
+        <input type="text" name="query" placeholder="Search for courses..." class="p-2 border border-gray-300 rounded-lg flex-grow">
+        <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition">Search</button>
+    </form>
+</section>
 <!-- All Courses Section -->
 <main class="p-10">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6">All Courses</h2>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">All Courses</h2>
     <div class="grid grid-cols-1 gap-6">
     @for(Course course: courses)
             <a href="/courses/${course.getId()}"
@@ -29,7 +40,7 @@
                 <p class="text-gray-600">${course.getShortDescription()}</p>
             </a>
     @endfor
-        </div>
+    </div>
 </main>
 
 </body>

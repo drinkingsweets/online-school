@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/courses")
@@ -38,19 +39,42 @@ public class CourseController {
         return "page/courses";
     }
 
+    @PostMapping
+    String search(@RequestParam(required = false) String query,
+                  @RequestParam(required = false) LocalDate startDate,
+                  @RequestParam(required = false) LocalDate endDate,
+                  Model model) {
+        if (query != null && startDate == null && endDate == null) {
+            model.addAttribute("courses", courseRepository.findByTitleContainingIgnoreCase(query));
+        } else if (query != null && startDate != null && endDate != null) {
+            model.addAttribute("courses", courseRepository.findByTitleContainingIgnoreCaseAndCreatedAtBetween(query, startDate, endDate));
+        } else if (query == null && startDate != null && endDate != null) {
+            model.addAttribute("courses", courseRepository.findByCreatedAtBetween(startDate, endDate));
+        } else if (query != null && startDate != null && endDate == null) {
+            model.addAttribute("courses", courseRepository.findByTitleContainingIgnoreCaseAndCreatedAtAfter(query, startDate));
+        } else if (query != null && startDate == null && endDate != null) {
+            model.addAttribute("courses", courseRepository.findByTitleContainingIgnoreCaseAndCreatedAtBefore(query, endDate));
+        } else if (query == null && startDate != null && endDate == null) {
+            model.addAttribute("courses", courseRepository.findByCreatedAtAfter(startDate));
+        } else if (query == null && startDate == null && endDate != null) {
+            model.addAttribute("courses", courseRepository.findByCreatedAtBefore(endDate));
+        } else {
+            model.addAttribute("courses", courseRepository.findAll());
+        }
+        return "page/courses";
+    }
+
     @GetMapping("/{id}")
     String show(Model model, @PathVariable Long id, Principal principal) {
         User user = userRepository.findByUsername(principal.getName()).get();
         if (user.getRole() == 1) {
             model.addAttribute("isAdmin", true);
-        }
-        else {
+        } else {
             model.addAttribute("isAdmin", false);
         }
         if (user.getCourses().contains(courseRepository.findById(id).get())) { // checking if course is added
             model.addAttribute("isAdded", true);
-        }
-        else {
+        } else {
             model.addAttribute("isAdded", false);
         }
         model.addAttribute("course", courseRepository.findById(id).get());
@@ -96,7 +120,7 @@ public class CourseController {
 
     @GetMapping("/{id}/{lessonNum}/edit")
     String editCourse(@PathVariable long id,
-                      @PathVariable int lessonNum,  Model model, Principal principal) {
+                      @PathVariable int lessonNum, Model model, Principal principal) {
         Lesson lesson;
 
         if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
@@ -116,10 +140,10 @@ public class CourseController {
                 return "contents/courses-edit";
 
             } else if (lessonNum > course.getLessons()
-                             .stream()
-                             .mapToInt(Lesson::getLessonNumber)
-                             .max()
-                             .getAsInt()) {
+                    .stream()
+                    .mapToInt(Lesson::getLessonNumber)
+                    .max()
+                    .getAsInt()) {
 
                 lesson = new Lesson();
                 lesson.setTitle("Untitled");
