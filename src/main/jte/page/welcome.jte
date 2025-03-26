@@ -1,3 +1,7 @@
+@import app.onlineschool.dto.WelcomePage
+@import app.onlineschool.model.Course
+@param WelcomePage page
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,21 +41,18 @@
     </section>
 
     <section id="courses" class="py-20 text-center">
-        <h2 class="text-3xl font-bold mb-6">Popular Courses</h2>
-        <div class="grid md:grid-cols-3 gap-6 px-6">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-xl font-semibold">Web Development</h3>
-                <p class="text-gray-600">Learn HTML, CSS, and JavaScript from scratch.</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-xl font-semibold">Data Science</h3>
-                <p class="text-gray-600">Master Python, SQL, and Machine Learning.</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-xl font-semibold">Digital Marketing</h3>
-                <p class="text-gray-600">Boost your brand with SEO and social media.</p>
-            </div>
-        </div>
-    </section>
+    <h2 class="text-3xl font-bold mb-6">Popular Courses</h2>
+    <div class="grid md:grid-cols-3 gap-6 px-6">
+        @for(Course course: page.getCourses3())
+            <a href="/courses/${course.getId()}" class="h-full">
+                <div class="bg-white p-6 rounded-lg shadow flex flex-col h-full">
+                    <h3 class="text-xl font-semibold">${course.getTitle()}</h3>
+                    <p class="text-gray-600 flex-grow">${course.getShortDescription()}</p>
+                </div>
+            </a>
+        @endfor
+    </div>
+</section>
+
 </body>
 </html>

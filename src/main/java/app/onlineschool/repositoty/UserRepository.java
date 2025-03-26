@@ -15,4 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.courseProgress cp WHERE KEY(cp) = :courseId")
     List<User> findUsersByCourseId(@Param("courseId") Long courseId);
+
+    @Query("SELECT c.id, COUNT(u) FROM User u JOIN u.courses c GROUP BY c.id ORDER BY COUNT(u) DESC")
+    List<Object[]> countUsersByCourseId();
 }

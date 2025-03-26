@@ -47,7 +47,7 @@
 
             <form action="/profile/picture_change" method="post" class="flex flex-col space-y-2 mt-4">
                 <input type="link" name="link" id="link" placeholder="Put link to new profile picture..."
-                       class="p-2 border rounded">
+                       class="p-2 border rounded" required>
                 <button type="submit"
                         class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                     Change profile picture

@@ -1,7 +1,10 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.RegisterLoginPage;
+import app.onlineschool.dto.WelcomePage;
+import app.onlineschool.model.Course;
 import app.onlineschool.model.User;
+import app.onlineschool.repositoty.CourseRepository;
 import app.onlineschool.repositoty.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.awt.desktop.ScreenSleepEvent;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -23,12 +29,32 @@ public class BaseController {
     UserRepository userRepository;
 
     @Autowired
+    CourseRepository courseRepository;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
 
     @GetMapping
-    String index() {
+    String index(Model model) {
+        List<Object[]> topCourses = userRepository.countUsersByCourseId();
+        List<Course> courses3 = new ArrayList<>();
+
+        for(Object[] object: topCourses) {
+            System.out.println(object[0] + " " + object[1]);
+        }
+        for (int i = 0; i < Math.min(3, topCourses.size()); i++) {
+            Object[] result = topCourses.get(i);
+            Long courseId = (Long) result[0];
+            Course course = courseRepository.findById(courseId).orElse(null);
+            if (course != null) {
+                courses3.add(course);
+            }
+        }
+        WelcomePage wp = new WelcomePage();
+        wp.setCourses3(courses3);
+        model.addAttribute("page", wp);
         return "page/welcome";
-    } // TODO add top courses based on popularity
+    }
 
     @GetMapping("/login")
     String login(@RequestParam(value = "error", required = false) String error,
