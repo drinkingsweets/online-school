@@ -27,6 +27,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -46,7 +47,7 @@
     <nav class="flex-1">
         <ul class="space-y-4">
             <li>
-                <a href="/" class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
+                <a href="/home" class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
                     <span class="text-xl">🏠</span>
                     <span class="text-xs hidden">Главная</span>
                 </a>

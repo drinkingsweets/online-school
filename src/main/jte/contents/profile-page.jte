@@ -27,6 +27,12 @@
                     ${page.getSuccess()}
                 </div>
             @endif
+
+            @if(!page.getAdminMessage().isEmpty())
+                <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
+                    ${page.getAdminMessage()}
+                </div>
+            @endif
             @if(!page.getError().isEmpty())
                 <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
                     ${page.getError()}
@@ -53,6 +59,16 @@
                     Change profile picture
                 </button>
             </form>
+            @if(page.isAdmin())
+            <form action="/profile/add_admin" method="post" class="flex flex-col space-y-2 mt-4">
+                <input name="username" id="username" placeholder="Type login of user to make admin..."
+                       class="p-2 border rounded" required>
+                <button type="submit"
+                        class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition">
+                    Add admin
+                </button>
+            </form>
+            @endif
 
             <button id="deleteUserButton"
                     class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition mt-8">
@@ -67,6 +83,7 @@
                     Confirm Delete
                 </button>
             </form>
+
         </div>
     </div>
     <script>

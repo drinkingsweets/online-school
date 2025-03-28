@@ -2,15 +2,12 @@ package app.onlineschool.controller;
 
 import app.onlineschool.dto.ProfilePage;
 import app.onlineschool.model.User;
-import app.onlineschool.repositoty.UserRepository;
+import app.onlineschool.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -23,9 +20,13 @@ public class ProfileController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping
-    String index(Model model, Principal principal) {
+    String index(Model model, Principal principal,@RequestParam(value = "success", required = false) String success) {
         ProfilePage pp = new ProfilePage();
         pp.setUser(userRepository.findByUsername(principal.getName()).get());
+        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+            pp.setAdmin(true);
+        }
+        pp.setAdminMessage(success == null ? "" : success.replace("+", " "));
         model.addAttribute("page", pp);
         return "contents/profile-page";
     }
@@ -72,5 +73,16 @@ public class ProfileController {
             return "redirect:/logout";
         }
         return "redirect:/profile";
+    }
+
+    @PostMapping("add_admin")
+    String addAdmin(@RequestParam String username, Principal principal) {
+        if (userRepository.findByUsername(principal.getName()).get().getRole() != 1) {
+            return "redirect:/profile";
+        }
+        User user = userRepository.findByUsername(username).get();
+        user.setRole(1);
+        userRepository.save(user);
+        return "redirect:/profile?success=Admin+added";
     }
 }

@@ -2,7 +2,7 @@ package app.onlineschool.service;
 
 import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.User;
-import app.onlineschool.repositoty.UserRepository;
+import app.onlineschool.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,9 +27,16 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Обновляем время последнего входа
+        user.setLastLogin(LocalDate.now());
+        userRepository.save(user);
+
+        return user;
     }
+
 
     @Override
     public void createUser(UserDetails userData) {

@@ -40,6 +40,8 @@ public class User implements BaseEntity, UserDetails {
     @CreatedDate
     private LocalDate createdAt;
 
+    private LocalDate lastLogin;
+
     @ManyToMany
     @JoinTable(
         name = "user_courses",

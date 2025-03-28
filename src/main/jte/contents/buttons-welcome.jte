@@ -19,6 +19,11 @@ content = @`<h1 class="text-2xl font-bold">Welcome back!</h1>
             <h3 class="text-xl font-semibold text-gray-800">Add new course</h3>
             <p class="text-gray-600">Create new course(admin only)</p>
         </a>
+            <a href="/statistics"
+           class="bg-white p-4 rounded-lg shadow hover:bg-gray-50 transition duration-200 text-center">
+            <h3 class="text-xl font-semibold text-gray-800">Statistics</h3>
+            <p class="text-gray-600">View statistics</p>
+        </a>
         @endif
 <%--        <a href="/progress" class="bg-white p-6 rounded-lg shadow hover:bg-gray-50 transition duration-200 text-center">--%>
 <%--            <h3 class="text-xl font-semibold text-gray-800">Digital Marketing</h3>--%>

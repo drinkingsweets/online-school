@@ -10,4 +10,6 @@ public class ProfilePage {
     private User user;
     private String success = "";
     private String error = "";
+    private boolean isAdmin = false;
+    private String adminMessage = "";
 }

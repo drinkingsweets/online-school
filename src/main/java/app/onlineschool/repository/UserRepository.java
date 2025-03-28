@@ -1,4 +1,4 @@
-package app.onlineschool.repositoty;
+package app.onlineschool.repository;
 
 import app.onlineschool.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +18,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT c.id, COUNT(u) FROM User u JOIN u.courses c GROUP BY c.id ORDER BY COUNT(u) DESC")
     List<Object[]> countUsersByCourseId();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE EXTRACT(MONTH FROM u.lastLogin) = :month")
+    Integer countUsersByMonth(@Param("month") int month);
+
+    @Query("SELECT COUNT(u) FROM User u")
+    Integer countAllUsers();
 }

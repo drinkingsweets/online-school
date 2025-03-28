@@ -2,9 +2,9 @@ package app.onlineschool.controller;
 
 import app.onlineschool.model.Lesson;
 import app.onlineschool.model.User;
-import app.onlineschool.repositoty.CourseRepository;
-import app.onlineschool.repositoty.LessonRepository;
-import app.onlineschool.repositoty.UserRepository;
+import app.onlineschool.repository.CourseRepository;
+import app.onlineschool.repository.LessonRepository;
+import app.onlineschool.repository.UserRepository;
 import app.onlineschool.service.MarkdownService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
