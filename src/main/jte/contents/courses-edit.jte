@@ -19,8 +19,8 @@
                         Previous Lesson
                     </a>
                     @endif
-                    <a href="/courses/${page.getLesson().getCourse().getId()}/${page.getNextLesson()}/preview" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
-                        Preview
+                    <a href="/test/${page.getLesson().getCourse().getId()}/${page.getLesson().getLessonNumber()}/create" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+                        View Test
                     </a>
 
                 </div>

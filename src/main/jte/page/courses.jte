@@ -10,7 +10,6 @@
     <title>All Courses</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/css/styles.css">
     <link rel="apple-touch-icon" sizes="57x57" href="/favicon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/favicon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/favicon-72x72.png">

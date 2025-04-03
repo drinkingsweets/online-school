@@ -1,33 +1,26 @@
 package app.onlineschool.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "lessons")
+@Table(name = "answers")
 @Getter
 @Setter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
-public class Lesson {
+public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false) // Explicitly define the foreign key column
-    private Course course;
+    @JoinColumn(name = "question_id")
+    private Question question;
 
-    @NotBlank
-    private String title;
-
-//    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private int lessonNumber;
+    private int isCorrect; // 0 - false, 1 - true
 }
