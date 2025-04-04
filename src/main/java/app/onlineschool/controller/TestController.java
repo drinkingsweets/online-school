@@ -12,9 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,20 +69,65 @@ public class TestController {
     }
 
     @GetMapping("/{courseId}/{lessonNum}/{questionNumber}/edit")
-    String viewEdit(@PathVariable Long courseId, @PathVariable int lessonNum, @PathVariable Integer questionNumber, Model model, Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 0) {
+    String viewEdit(@PathVariable Long courseId,
+                    @PathVariable int lessonNum,
+                    @PathVariable Integer questionNumber,
+                    Model model,
+                    Principal principal) {
+
+        if (userRepository.findByUsername(principal.getName())
+                .map(user -> user.getRole() == 0)
+                .orElse(true)) {
             return "redirect:/course/" + courseId + "/" + lessonNum;
         }
-        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum).get();
-        Optional<Test> test = testRepository.findByLessonId(lesson.getId());
-        if (test.isEmpty()) {
+
+        // Get lesson and test
+        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum)
+                .orElse(null);
+        if (lesson == null) {
             return "redirect:/course/" + courseId + "/" + lessonNum;
         }
+
+        Test test = testRepository.findByLessonId(lesson.getId())
+                .orElseGet(() -> {
+                    Test newTest = new Test();
+                    newTest.setLesson(lesson);
+                    return testRepository.save(newTest);
+                });
+
+        // Handle question numbering
+        List<Question> questions = test.getQuestions();
+        if (questions == null) {
+            questions = new ArrayList<>();
+            test.setQuestions(questions);
+        }
+
+        // Check if we need to create a new question
+        if (questionNumber > questions.size()) {
+            Question newQuestion = new Question();
+            newQuestion.setContent("Untitled");
+            newQuestion.setNumberInLesson(questionNumber); // Use the actual question number
+            newQuestion.setTest(test);
+
+            // Create default answer
+            Answer defaultAnswer = new Answer();
+            defaultAnswer.setIsCorrect(0);
+            defaultAnswer.setContent("Answer 1");
+            defaultAnswer.setQuestion(newQuestion);
+
+            newQuestion.setAnswers(new ArrayList<>(List.of(defaultAnswer)));
+            questions.add(newQuestion);
+
+            testRepository.save(test);
+        }
+
+        // Prepare view model
         TestShowPage testShowPage = new TestShowPage();
-        testShowPage.setTest(test.get());
+        testShowPage.setTest(test);
         testShowPage.setCourseId(courseId);
         testShowPage.setQuestionNumber(questionNumber);
         model.addAttribute("page", testShowPage);
+
         return "contents/test-edit";
     }
 
@@ -96,19 +139,19 @@ public class TestController {
             @RequestParam String questionContent,
             @RequestParam Map<String, String> allParams,
             @RequestParam(required = false) List<Long> correctAnswers,
+            @RequestParam(required = false) List<Long> deletedAnswers,
             @RequestParam(required = false) String redirect) {
+
 
         // 1. Get the test and question
         Test test = testRepository.findByLessonId(lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNumber).get().getId()).get();
+
         Question question = test.getQuestions().get(questionNumber - 1);
 
-        // 2. Update question content
-        question.setContent(questionContent);
 
-        // 3. Process answers
-        List<Answer> answers = question.getAnswers();
-        Map<Long, Answer> answerMap = answers.stream()
-                .collect(Collectors.toMap(Answer::getId, Function.identity()));
+        // 2. Update question content
+        List<Answer> currentAnswers = new ArrayList<>();
+        Set<Long> processedIds = new HashSet<>();
 
         allParams.entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("answer_"))
@@ -118,31 +161,43 @@ public class TestController {
                         Long answerId = Long.parseLong(idStr);
                         String answerContent = entry.getValue();
 
-                        // Handle null check properly
-                        if (answerId != null && answerId > 0 && answerMap.containsKey(answerId)) {
-                            // Update existing answer
-                            Answer answer = answerMap.get(answerId);
+                        Answer answer;
+                        if (answerId > 0) {
+                            // Existing answer - find and update it
+                            answer = question.getAnswers().stream()
+                                    .filter(a -> a.getId() == answerId)
+                                    .findFirst()
+                                    .orElseThrow(() -> new RuntimeException("Answer not found"));
                             answer.setContent(answerContent);
-                            // Handle null check for correctAnswers
-                            answer.setIsCorrect((correctAnswers != null && correctAnswers.contains(answerId)) ? 1 : 0);
                         } else {
-                            // Handle new answers
-                            Answer newAnswer = new Answer();
-                            newAnswer.setContent(answerContent);
-                            // Handle null check for correctAnswers
-                            newAnswer.setIsCorrect((correctAnswers != null && correctAnswers.contains(answerId)) ? 1 : 0);
-                            newAnswer.setQuestion(question);
-                            answers.add(newAnswer);
+                            // New answer - create it
+                            answer = new Answer();
+                            answer.setContent(answerContent);
+                            answer.setQuestion(question);
                         }
+                        answer.setIsCorrect(correctAnswers != null && correctAnswers.contains(answerId) ? 1 : 0);
+                        currentAnswers.add(answer);
+                        processedIds.add(answerId);
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid answer ID format: " + entry.getKey());
+                        System.out.println(("Invalid answer ID format: {}" + entry.getKey()));
                     }
                 });
 
-        // 4. Save changes
+        // 3. Handle deleted answers
+        if (deletedAnswers != null) {
+            deletedAnswers.forEach(id -> {
+                if (id > 0) { // Only delete existing answers (positive IDs)
+                    question.getAnswers().removeIf(a -> a.getId() == id);
+                }
+            });
+        }
+
+        // 4. Update question
+        question.setContent(questionContent);
+        question.setAnswers(currentAnswers);
         testRepository.save(test);
 
-        // 5. Handle redirect
+        // 6. Handle redirect
         if (redirect != null && !redirect.isEmpty()) {
             return "redirect:" + redirect;
         }
@@ -150,5 +205,6 @@ public class TestController {
         return "redirect:/test/" + courseId + "/" + lessonNumber + "/" + questionNumber + "/edit";
     }
 
+//    @GetMapping("/{courseId}/{lessonNum}/{questionNumber}delete")
 
 }

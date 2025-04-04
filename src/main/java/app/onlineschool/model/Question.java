@@ -29,4 +29,12 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers;
+
+    public void setAnswers(List<Answer> answers) {
+        this.answers.clear(); // Clear existing collection
+        if (answers != null) {
+            this.answers.addAll(answers); // Add new answers
+            answers.forEach(a -> a.setQuestion(this)); // Set bidirectional relationship
+        }
+    }
 }
