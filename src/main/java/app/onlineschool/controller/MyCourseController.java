@@ -1,21 +1,22 @@
 package app.onlineschool.controller;
 
+import app.onlineschool.dto.CurrentLessonPage;
 import app.onlineschool.model.Lesson;
+import app.onlineschool.model.Test;
 import app.onlineschool.model.User;
 import app.onlineschool.repository.CourseRepository;
 import app.onlineschool.repository.LessonRepository;
+import app.onlineschool.repository.TestRepository;
 import app.onlineschool.repository.UserRepository;
 import app.onlineschool.service.MarkdownService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Collections;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/mycourses")
@@ -31,6 +32,8 @@ public class MyCourseController {
 
     @Autowired
     MarkdownService markdownService;
+    @Autowired
+    private TestRepository testRepository;
 
     @GetMapping
     String index(Model model, Principal principal) {
@@ -42,19 +45,42 @@ public class MyCourseController {
     }
 
     @GetMapping("/{id}")
-    String show(Model model, @PathVariable Long id, Principal principal) {
-        // showing lesson when clicked on course
+    String show(Model model, @PathVariable Long id, Principal principal,
+                @RequestParam(name = "lessonNum", required = false) String redirectToLesson) {
         User user = userRepository.findByUsername(principal.getName()).get();
         if (user.getCourses().contains(courseRepository.findById(id).get())) {
-            int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
-            model.addAttribute("currentLesson", lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get());
 
-            //tests
-            System.out.println("from db:");
-            System.out.println(lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get().getContent());
-            System.out.println("\n\n\nfrom service:");
-            System.out.println(markdownService.convertMarkdownToHtml(lessonRepository.findByCourseIdAndLessonNumber(id, lessonCurrent).get().getContent()));
-            //tests
+            CurrentLessonPage clp = new CurrentLessonPage();
+            int lessonNumberCurrent = user.getCourseProgress().get(id).getCompletedLessons();
+            Lesson lesson;
+
+            if (redirectToLesson != null) {
+                // Если запрошен конкретный урок по параметру
+                long requestedLessonNum = Long.parseLong(redirectToLesson);
+                lesson = lessonRepository.findByCourseIdAndLessonNumber(id, requestedLessonNum).get();
+                clp.setLessonNum(redirectToLesson);
+
+                // Проверяем, является ли запрошенный урок уже пройденным
+                boolean isLessonCompleted = requestedLessonNum < lessonNumberCurrent;
+                Optional<Test> testForLesson = testRepository.findByLessonId(lesson.getId());
+                if (testForLesson.isPresent() && !isLessonCompleted) {
+                    // Показываем тест только если урок текущий (не пройденный)
+                    clp.setHasTest(true);
+                    clp.setTest(testForLesson.get());
+                }
+            } else {
+                // Показываем текущий урок (последний непройденный)
+                lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNumberCurrent).get();
+
+                Optional<Test> testForLesson = testRepository.findByLessonId(lesson.getId());
+                if (testForLesson.isPresent()) {
+                    clp.setHasTest(true);
+                    clp.setTest(testForLesson.get());
+                }
+            }
+
+            clp.setLesson(lesson);
+            model.addAttribute("page", clp);
             model.addAttribute("markdownService", markdownService);
             return "contents/mycourses-lesson";
         }
@@ -62,10 +88,16 @@ public class MyCourseController {
     }
 
     @PostMapping("/{id}/next")
-    String nextLesson(@PathVariable long id, Principal principal) {
+    String nextLesson(@PathVariable long id,
+                      @RequestParam(name = "lessonNum", required = false) String redirectToLesson,
+                      Principal principal) {
         User user = userRepository.findByUsername(principal.getName()).get();
         if (user.getCourses().contains(courseRepository.findById(id).get())) { // if user has this course
             int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
+
+            if (redirectToLesson != null && Integer.parseInt(redirectToLesson) < lessonCurrent)
+                return "redirect:/mycourses/" + id + "?lessonNum=" + (Long.parseLong(redirectToLesson) + 1);
+
             if (lessonCurrent == Collections.max(courseRepository.findById(id).get().getLessons()
                     .stream()
                     .map(Lesson::getLessonNumber)
@@ -92,19 +124,17 @@ public class MyCourseController {
         return "redirect:/courses/" + id;
     }
 
-    @PostMapping("/{id}/previous")
-    String previousLesson(@PathVariable long id, Principal principal) {
+    @PostMapping("/{id}/{lessonNum}")
+    String gotoLesson(@PathVariable long id,
+                      @PathVariable long lessonNum,
+                      Principal principal) {
         User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getCourses().contains(courseRepository.findById(id).get())) {
-            int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
-            if (lessonCurrent > 1) {
-                user.getCourseProgress().get(id).setCompletedLessons(lessonCurrent - 1);
-                userRepository.save(user);
-            }
-            return "redirect:/mycourses/" + id;
+        if (user.getCourses().contains(courseRepository.findById(id).get()) && user.getCourseProgress().get(id).getCompletedLessons() >= lessonNum) {
+            // Просто перенаправляем на указанный урок без изменения completedLessons
+            return "redirect:/mycourses/" + id + "?lessonNum=" + lessonNum;
         }
         return "redirect:/courses/" + id;
     }
 
-    //TODO add admin interface for adding lessons
+
 }

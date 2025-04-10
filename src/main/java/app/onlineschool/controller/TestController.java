@@ -1,10 +1,7 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.TestShowPage;
-import app.onlineschool.model.Answer;
-import app.onlineschool.model.Lesson;
-import app.onlineschool.model.Question;
-import app.onlineschool.model.Test;
+import app.onlineschool.model.*;
 import app.onlineschool.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/test")
@@ -34,6 +29,9 @@ public class TestController {
     @Autowired
     AnswerRepository answerRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
     @GetMapping("/{courseId}/{lessonNum}/create")
     String index(@PathVariable Long courseId, @PathVariable int lessonNum, Principal principal) {
 
@@ -52,16 +50,19 @@ public class TestController {
             newQuestion.setContent("Untitled");
             newQuestion.setNumberInLesson(1);
             newQuestion.setTest(newTest);
+            newQuestion.setAnswers(new ArrayList<>());
 
             Answer newAnswer = new Answer();
             newAnswer.setIsCorrect(0);
             newAnswer.setContent("Answer 1");
             newAnswer.setQuestion(newQuestion);
 
-            newQuestion.setAnswers(List.of(newAnswer));
-            newTest.setQuestions(List.of(newQuestion));
+            newQuestion.getAnswers().add(newAnswer);
+            newTest.setQuestions(new ArrayList<>());
+            newTest.getQuestions().add(newQuestion);
 
             testRepository.save(newTest);
+
 
         }
 
@@ -194,7 +195,7 @@ public class TestController {
 
         // 4. Update question
         question.setContent(questionContent);
-        question.setAnswers(currentAnswers);
+        question.clearAndSetAnswers(currentAnswers);
         testRepository.save(test);
 
         // 6. Handle redirect
@@ -205,6 +206,28 @@ public class TestController {
         return "redirect:/test/" + courseId + "/" + lessonNumber + "/" + questionNumber + "/edit";
     }
 
-//    @GetMapping("/{courseId}/{lessonNum}/{questionNumber}delete")
+
+    @GetMapping("/{courseId}/{lessonNum}/{questionNumber}")
+    String viewTest(@PathVariable Long courseId,
+                    @PathVariable int lessonNum,
+                    @PathVariable int questionNumber,
+                    Model model,
+                    Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).get();
+        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum).get();
+        Optional<Test> test = testRepository.findByLessonId(lesson.getId());
+        if (user.getCourses().contains(courseRepository.findById(courseId).get())) {
+            TestShowPage testShowPage = new TestShowPage();
+
+            testShowPage.setTest(test.get());
+            testShowPage.setCourseId(courseId);
+            testShowPage.setQuestionNumber(questionNumber);
+
+            model.addAttribute("page", testShowPage);
+            return "contents/test-user";
+        }
+        return "redirect:/courses/" + courseId + "/" + lessonNum;
+    }
+
 
 }

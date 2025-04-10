@@ -365,5 +365,105 @@ body {
     background-color: rgba(255, 68, 68, 0.1);
 }
 
+.user-lesson-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255, 165, 0, 0.5);
+}
+
+.question-container {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.question-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.answer-option {
+    display: block;
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.answer-option:hover {
+    background-color: #f0f0f0;
+    border-color: darkorange;
+}
+
+.answer-option input[type="radio"] {
+    margin-right: 10px;
+    accent-color: darkorange;
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: darkorange;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #ff8c00;
+}
+
+.question-counter {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.user-nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.user-nav-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid darkorange;
+    color: darkorange;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.user-nav-btn:hover {
+    background: rgba(255, 140, 0, 0.1);
+}
+
+.user-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedback-message {
+            margin-top: 15px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
 
 
