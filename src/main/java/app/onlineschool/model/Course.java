@@ -31,9 +31,14 @@ public class Course {
     @CreatedDate
     private LocalDate createdAt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
 
     @ManyToMany(mappedBy = "courses")
     private List<User> users = new ArrayList<>();
+
+    public void removeLesson(Lesson lesson) {
+        lessons.remove(lesson);
+        lesson.setCourse(null); // Важно! Чтобы Hibernate понял, что lesson действительно удаляется
+    }
 }

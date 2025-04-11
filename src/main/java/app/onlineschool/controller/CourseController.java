@@ -7,9 +7,11 @@ import app.onlineschool.model.Lesson;
 import app.onlineschool.model.User;
 import app.onlineschool.repository.CourseRepository;
 import app.onlineschool.repository.LessonRepository;
+import app.onlineschool.repository.TestRepository;
 import app.onlineschool.repository.UserRepository;
 import app.onlineschool.service.CustomUserDetailsService;
 import app.onlineschool.service.MarkdownService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/courses")
@@ -32,6 +35,8 @@ public class CourseController {
     private MarkdownService markdownService;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private TestRepository testRepository;
 
     @GetMapping
     String index(Model model) {
@@ -94,8 +99,6 @@ public class CourseController {
         userRepository.save(user);
         return "redirect:/courses/" + id;
     }
-
-    //TODO make a search bar for courses
 
     @GetMapping("/create")
     String createCourse(Principal principal) {
@@ -196,5 +199,36 @@ public class CourseController {
             return "contents/courses-preview";
         }
         return "redirect:/courses/" + id + "/" + lessonNum;
+    }
+
+    @PostMapping("/{courseId}/{lessonNum}/delete")
+    @Transactional
+    String deleteLesson(@PathVariable long courseId,
+                        @PathVariable int lessonNum,
+                        Principal principal) {
+        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1 && lessonNum > 1) {
+            Course course = courseRepository.findById(courseId).get();
+
+            Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum)
+                    .orElseThrow(() -> new RuntimeException("Lesson not found"));
+            testRepository.deleteByLesson(lesson);
+            course.removeLesson(lesson);
+
+
+            int maxLessonNumber = course.getLessons().stream()
+                    .mapToInt(Lesson::getLessonNumber)
+                    .max()
+                    .orElse(1);
+
+            List<User> users = userRepository.findByCoursesContaining(course);
+            for (User user : users) {
+                User.CourseProgress progress = user.getCourseProgress().get(courseId);
+                if (progress != null && progress.getCompletedLessons() > maxLessonNumber) {
+                    progress.setCompletedLessons(maxLessonNumber);
+                }
+            }
+            userRepository.saveAll(users);
+        }
+        return "redirect:/courses/" + courseId + "/" + (lessonNum - 1) + "/edit";
     }
 }

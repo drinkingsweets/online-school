@@ -1,5 +1,6 @@
 package app.onlineschool.repository;
 
+import app.onlineschool.model.Course;
 import app.onlineschool.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u")
     Integer countAllUsers();
+
+    List<User> findByCoursesContaining(Course course);
 }
