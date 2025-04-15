@@ -3,7 +3,7 @@
 
 @template.layout.sidebar(content =
 @`
-<body class="bg-gray-100 flex justify-center items-center min-h-screen p-4">
+    <body class="bg-gray-100 flex justify-center items-center min-h-screen p-4">
     <div class="bg-white shadow-lg w-full h-screen flex flex-col p-6 relative">
         <form action="/courses/${page.getLesson().getCourse().getId()}/${page.getLesson().getLessonNumber()}/delete"
               method="post"
@@ -18,7 +18,7 @@
             </button>
         </form>
 
-        <form action="/courses/${page.getLesson().getCourse().getId()}/${page.getLesson().getLessonNumber()}/edit" method="post" class="flex flex-col space-y-4 flex-grow mt-8"> <!-- Added mt-8 to account for delete button -->
+        <form action="/courses/${page.getLesson().getCourse().getId()}/${page.getLesson().getLessonNumber()}/edit" method="post" class="flex flex-col space-y-4 flex-grow mt-8">
             <input type="text" id="title" name="title" value="${page.getLesson().getTitle()}" required
                    class="w-full text-3xl font-semibold outline-none border-transparent bg-transparent focus:bg-gray-100 p-2">
             <textarea name="content" required
@@ -48,19 +48,16 @@
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                         </svg>
                     </a>
+                    <button type="submit"
+                            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center w-24"
+                            title="Save">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
+                        </svg>
+                    </button>
                 </div>
-            </div>
-
-            <div class="flex justify-end">
-                <button type="submit"
-                        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center"
-                        title="Save">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
-                    </svg>
-                </button>
             </div>
         </form>
     </div>
-</body>
+    </body>
 `)

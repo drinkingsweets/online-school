@@ -2,6 +2,7 @@ package app.onlineschool.controller;
 
 import app.onlineschool.dto.CourseEditPage;
 import app.onlineschool.dto.PreviewPage;
+import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.Course;
 import app.onlineschool.model.Lesson;
 import app.onlineschool.model.User;
@@ -230,5 +231,26 @@ public class CourseController {
             userRepository.saveAll(users);
         }
         return "redirect:/courses/" + courseId + "/" + (lessonNum - 1) + "/edit";
+    }
+
+    @PostMapping("/{id}/delete")
+    @Transactional
+    public String deleteCourse(@PathVariable long id, Principal principal) {
+        if (userRepository.findByUsername(principal.getName()).get().getRole() == 0) {
+            return "redirect:/courses/" + id;
+        }
+
+        Course course = courseRepository.findById(id).get();
+
+        List<User> usersWithCourse = userRepository.findByCoursesContaining(course);
+        for (User user : usersWithCourse) {
+            user.getCourses().remove(course);
+            user.getCourseProgress().remove(id); // Also remove progress tracking
+            userRepository.save(user);
+        }
+
+        courseRepository.delete(course);
+
+        return "redirect:/courses";
     }
 }
