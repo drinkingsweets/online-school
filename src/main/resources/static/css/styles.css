@@ -6,6 +6,12 @@ header {
     width: 100%;
 }
 
+.delete-question-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
 .animated-button {
     position: relative;
     display: flex;

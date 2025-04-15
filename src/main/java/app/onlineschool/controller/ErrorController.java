@@ -24,8 +24,4 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 
         return "error";
     }
-
-//    public String getErrorPath() {
-//        return "/error";
-//    }
 }

@@ -1,9 +1,13 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.TestShowPage;
+import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.*;
 import app.onlineschool.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -229,5 +233,49 @@ public class TestController {
         return "redirect:/courses/" + courseId + "/" + lessonNum;
     }
 
+    @PostMapping("/{courseId}/{lessonNumber}/{questionNumber}/delete")
+    @Transactional
+    public ResponseEntity<?> deleteQuestion(@PathVariable long courseId,
+            @PathVariable int lessonNumber,
+            @PathVariable int questionNumber,
+            Principal principal) {
 
+        try {
+            User user = userRepository.findByUsername(principal.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            if (user.getRole() != 1) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNumber)
+                    .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+            Test test = testRepository.findByLessonId(lesson.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Test not found"));
+            Question question = questionRepository.findByTestIdAndNumberInLesson(test.getId(), questionNumber)
+                    .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+
+            answerRepository.deleteAllByQuestion(question);
+            questionRepository.delete(question);
+
+            reorderQuestionsAfterDeletion(test.getId(), questionNumber);
+
+            return ResponseEntity.ok().build();
+
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Error deleting question");
+        }
+    }
+
+    private void reorderQuestionsAfterDeletion(long testId, int deletedQuestionNumber) {
+        List<Question> questionsToReorder = questionRepository
+                .findByTestIdAndNumberInLessonGreaterThan(testId, deletedQuestionNumber);
+
+        for (Question q : questionsToReorder) {
+            q.setNumberInLesson(q.getNumberInLesson() - 1);
+            questionRepository.save(q);
+        }
+    }
 }
