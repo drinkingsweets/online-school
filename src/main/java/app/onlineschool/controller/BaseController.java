@@ -103,4 +103,10 @@ public class BaseController {
                 userRepository.findByUsername(principal.getName()).get().getRole() == 1);
         return "contents/buttons-welcome";
     }
+
+    @GetMapping("/about")
+    String about(Model model) {
+        model.addAttribute("author", userRepository.findByUsername("admin").get());
+        return "contents/about";
+    }
 }

@@ -66,6 +66,11 @@
             </li>
         </ul>
     </nav>
+    <a href="/about" class="mt-auto flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
+        <span class="text-xl">ℹ️</span>
+        <span class="text-xs hidden">Об авторе</span>
+    </a>
+
     <a href="/logout" class="mt-auto flex items-center space-x-2 p-2 rounded hover:bg-gray-200">
         <span class="text-xl">🚪</span>
         <span class="text-xs hidden">Выход</span>
