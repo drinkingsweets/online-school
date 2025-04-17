@@ -1,6 +1,7 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.CurrentLessonPage;
+import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.Lesson;
 import app.onlineschool.model.Test;
 import app.onlineschool.model.User;
@@ -37,8 +38,8 @@ public class MyCourseController {
 
     @GetMapping
     String index(Model model, Principal principal) {
-        // showing all courses
-        User user = userRepository.findByUsername(principal.getName()).get();
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         model.addAttribute("courses", user.getCourses());
         model.addAttribute("courseProgress", user.getCourseProgress());
         return "contents/mycourses-buttons";
@@ -47,30 +48,30 @@ public class MyCourseController {
     @GetMapping("/{id}")
     String show(Model model, @PathVariable Long id, Principal principal,
                 @RequestParam(name = "lessonNum", required = false) String redirectToLesson) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getCourses().contains(courseRepository.findById(id).get())) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getCourses().contains(courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
 
             CurrentLessonPage clp = new CurrentLessonPage();
             int lessonNumberCurrent = user.getCourseProgress().get(id).getCompletedLessons();
             Lesson lesson;
 
             if (redirectToLesson != null) {
-                // Если запрошен конкретный урок по параметру
                 long requestedLessonNum = Long.parseLong(redirectToLesson);
                 lesson = lessonRepository.findByCourseIdAndLessonNumber(id, requestedLessonNum).get();
                 clp.setLessonNum(redirectToLesson);
 
-                // Проверяем, является ли запрошенный урок уже пройденным
                 boolean isLessonCompleted = requestedLessonNum < lessonNumberCurrent;
                 Optional<Test> testForLesson = testRepository.findByLessonId(lesson.getId());
                 if (testForLesson.isPresent() && !isLessonCompleted) {
-                    // Показываем тест только если урок текущий (не пройденный)
                     clp.setHasTest(true);
                     clp.setTest(testForLesson.get());
                 }
             } else {
-                // Показываем текущий урок (последний непройденный)
-                lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNumberCurrent).get();
+                lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNumberCurrent)
+                        .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
                 Optional<Test> testForLesson = testRepository.findByLessonId(lesson.getId());
                 if (testForLesson.isPresent()) {
@@ -91,22 +92,28 @@ public class MyCourseController {
     String nextLesson(@PathVariable long id,
                       @RequestParam(name = "lessonNum", required = false) String redirectToLesson,
                       Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getCourses().contains(courseRepository.findById(id).get())) { // if user has this course
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getCourses().contains(courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
+
             int lessonCurrent = user.getCourseProgress().get(id).getCompletedLessons();
 
             if (redirectToLesson != null && Integer.parseInt(redirectToLesson) < lessonCurrent)
                 return "redirect:/mycourses/" + id + "?lessonNum=" + (Long.parseLong(redirectToLesson) + 1);
 
-            if (lessonCurrent == Collections.max(courseRepository.findById(id).get().getLessons()
+            if (lessonCurrent == Collections.max(courseRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found"))
+                    .getLessons()
                     .stream()
                     .map(Lesson::getLessonNumber)
-                    .toList())) { // if last lesson
-                user.getCourseProgress().get(id).setFinished(true); // set course as finished
+                    .toList())) {
+                user.getCourseProgress().get(id).setFinished(true);
                 userRepository.save(user);
                 return "redirect:/mycourses/" + id + "/finished";
             } else {
-                user.getCourseProgress().get(id).setCompletedLessons(lessonCurrent + 1); // setting next lesson
+                user.getCourseProgress().get(id).setCompletedLessons(lessonCurrent + 1);
                 userRepository.save(user);
                 return "redirect:/mycourses/" + id;
             }
@@ -116,9 +123,12 @@ public class MyCourseController {
 
     @GetMapping("/{id}/finished")
     String finishPage(@PathVariable Long id, Principal principal, Model model) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getCourses().contains(courseRepository.findById(id).get())) { // showing finish page
-            model.addAttribute("course", courseRepository.findById(id).get());
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getCourses().contains(courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
+            model.addAttribute("course", courseRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found")));
             return "contents/mycourses-finished";
         }
         return "redirect:/courses/" + id;
@@ -128,11 +138,15 @@ public class MyCourseController {
     String gotoLesson(@PathVariable long id,
                       @PathVariable long lessonNum,
                       Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getCourses().contains(courseRepository.findById(id).get()) && user.getCourseProgress().get(id).getCompletedLessons() >= lessonNum) {
-            // Просто перенаправляем на указанный урок без изменения completedLessons
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getCourses().contains(courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"))) &&
+                user.getCourseProgress().get(id).getCompletedLessons() >= lessonNum) {
             return "redirect:/mycourses/" + id + "?lessonNum=" + lessonNum;
         }
+
         return "redirect:/courses/" + id;
     }
 

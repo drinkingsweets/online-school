@@ -53,10 +53,20 @@ public class User implements BaseEntity, UserDetails {
     @ElementCollection
     @CollectionTable(name = "user_course_progress", joinColumns = @JoinColumn(name = "user_id"))
     @MapKeyColumn(name = "course_id")
-//    @Column(name = "completed_lessons")
     private Map<Long, CourseProgress> courseProgress = new HashMap<>();
 
     private String pfpLink;
+
+    public String checkIfAdminAndRedirectTo(String redirectAdmin, String redirectUser) {
+        if (this.isAdmin()) {
+            return redirectAdmin;
+        }
+        return redirectUser;
+    }
+
+    public boolean isAdmin() {
+        return this.getRole() == 1;
+    }
 
     @Override
     public String getPassword() {

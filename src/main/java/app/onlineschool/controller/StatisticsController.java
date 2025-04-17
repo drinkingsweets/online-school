@@ -1,6 +1,8 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.StatisticsPage;
+import app.onlineschool.exception.ResourceNotFoundException;
+import app.onlineschool.model.User;
 import app.onlineschool.repository.CourseRepository;
 import app.onlineschool.repository.LessonRepository;
 import app.onlineschool.repository.UserRepository;
@@ -10,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,27 +30,28 @@ public class StatisticsController {
     LessonRepository lessonRepository;
 
     @GetMapping
-    String index(Model model) {
+    String index(Model model, Principal principal) {
         StatisticsPage sp = new StatisticsPage();
 
-        // Define monthly labels (e.g. for the first 7 months)
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         List<String> months = Arrays.asList("January", "February", "March", "April", "May", "June", "July",
                 "August", "September", "October", "November", "December");
         sp.setUserActivityLabels(months);
 
-        // Collect monthly user activity data.
         List<Integer> monthlyActivityData = new ArrayList<>();
         for (int month = 1; month <= months.size(); month++) {
             monthlyActivityData.add(userRepository.countUsersByMonth(month));
         }
         sp.setUserActivityData(monthlyActivityData);
 
-        // Use course creation data instead of enrollment data.
         sp.setCourseEnrollmentLabels(months);
         List<Integer> courseCreationData = new ArrayList<>();
         for (int month = 1; month <= months.size(); month++) {
             courseCreationData.add(courseRepository.countCoursesByMonth(month));
         }
+
         sp.setCourseEnrollmentData(courseCreationData);
         sp.setCoursesTotal(courseRepository.countAllCourses());
         sp.setLessonsTotal(lessonRepository.countAllLessons());
@@ -55,7 +59,8 @@ public class StatisticsController {
 
         System.out.println(sp);
         model.addAttribute("page", sp);
-        return "contents/statistics-page";
+
+        return user.checkIfAdminAndRedirectTo("contents/statistics-page", "redirect:/home");
     }
 
 }

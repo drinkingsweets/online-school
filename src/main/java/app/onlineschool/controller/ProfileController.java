@@ -1,6 +1,7 @@
 package app.onlineschool.controller;
 
 import app.onlineschool.dto.ProfilePage;
+import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.User;
 import app.onlineschool.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,11 @@ public class ProfileController {
     @GetMapping
     String index(Model model, Principal principal,@RequestParam(value = "success", required = false) String success) {
         ProfilePage pp = new ProfilePage();
-        pp.setUser(userRepository.findByUsername(principal.getName()).get());
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        pp.setUser(user);
+
+        if (user.isAdmin()) {
             pp.setAdmin(true);
         }
         pp.setAdminMessage(success == null ? "" : success.replace("+", " "));
@@ -33,7 +37,9 @@ public class ProfileController {
 
     @PostMapping("/picture_change")
     String pictureChange(Principal principal, @RequestParam String link) {
-        User user = userRepository.findByUsername(principal.getName()).get();
+        User user = userRepository.findByUsername(principal.getName())
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         user.setPfpLink(link);
         userRepository.save(user);
         return "redirect:/profile";
@@ -45,7 +51,8 @@ public class ProfileController {
                           @RequestParam String newPassword,
                           @RequestParam String newPasswordRepeat,
                           Model model) {
-        User user = userRepository.findByUsername(principal.getName()).get();
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         ProfilePage pp = new ProfilePage();
         pp.setUser(user);
 
@@ -68,8 +75,11 @@ public class ProfileController {
 
     @PostMapping("/delete")
     String delete(Principal principal, @RequestParam String password) {
-        if(passwordEncoder.matches(password, userRepository.findByUsername(principal.getName()).get().getPasswordDigest())) {
-            userRepository.delete(userRepository.findByUsername(principal.getName()).get());
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (passwordEncoder.matches(password, user.getPasswordDigest())) {
+            userRepository.delete(user);
             return "redirect:/logout";
         }
         return "redirect:/profile";
@@ -77,12 +87,16 @@ public class ProfileController {
 
     @PostMapping("add_admin")
     String addAdmin(@RequestParam String username, Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() != 1) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.isAdmin()) {
             return "redirect:/profile";
         }
-        User user = userRepository.findByUsername(username).get();
-        user.setRole(1);
-        userRepository.save(user);
+        User createAdmin = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        createAdmin.setRole(1);
+        userRepository.save(createAdmin);
         return "redirect:/profile?success=Admin+added";
     }
 }

@@ -4,6 +4,7 @@ import app.onlineschool.dto.TestShowPage;
 import app.onlineschool.exception.ResourceNotFoundException;
 import app.onlineschool.model.*;
 import app.onlineschool.repository.*;
+import com.ibm.icu.impl.InvalidFormatException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,15 +40,17 @@ public class TestController {
     @GetMapping("/{courseId}/{lessonNum}/create")
     String index(@PathVariable Long courseId, @PathVariable int lessonNum, Principal principal) {
 
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 0) {
+        if (!userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()) {
             return "redirect:/courses/" + courseId + "/" + lessonNum;
         }
 
-        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum).get();
+        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum)
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
         Optional<Test> test = testRepository.findByLessonId(lesson.getId());
         if (test.isEmpty()) {
             Test newTest = new Test();
-            System.out.println(lesson);
             newTest.setLesson(lesson);
 
             Question newQuestion = new Question();
@@ -67,7 +70,6 @@ public class TestController {
 
             testRepository.save(newTest);
 
-
         }
 
         return "redirect:/test/" + courseId + "/" + lessonNum + "/1/edit";
@@ -80,9 +82,9 @@ public class TestController {
                     Model model,
                     Principal principal) {
 
-        if (userRepository.findByUsername(principal.getName())
-                .map(user -> user.getRole() == 0)
-                .orElse(true)) {
+        if (!userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()) {
             return "redirect:/course/" + courseId + "/" + lessonNum;
         }
 
@@ -100,21 +102,18 @@ public class TestController {
                     return testRepository.save(newTest);
                 });
 
-        // Handle question numbering
         List<Question> questions = test.getQuestions();
         if (questions == null) {
             questions = new ArrayList<>();
             test.setQuestions(questions);
         }
 
-        // Check if we need to create a new question
         if (questionNumber > questions.size()) {
             Question newQuestion = new Question();
             newQuestion.setContent("Untitled");
             newQuestion.setNumberInLesson(questionNumber); // Use the actual question number
             newQuestion.setTest(test);
 
-            // Create default answer
             Answer defaultAnswer = new Answer();
             defaultAnswer.setIsCorrect(0);
             defaultAnswer.setContent("Answer 1");
@@ -126,7 +125,6 @@ public class TestController {
             testRepository.save(test);
         }
 
-        // Prepare view model
         TestShowPage testShowPage = new TestShowPage();
         testShowPage.setTest(test);
         testShowPage.setCourseId(courseId);
@@ -148,13 +146,13 @@ public class TestController {
             @RequestParam(required = false) String redirect) {
 
 
-        // 1. Get the test and question
-        Test test = testRepository.findByLessonId(lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNumber).get().getId()).get();
+        Test test = testRepository.findByLessonId(lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"))
+                .getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Test not found"));
 
         Question question = test.getQuestions().get(questionNumber - 1);
 
-
-        // 2. Update question content
         List<Answer> currentAnswers = new ArrayList<>();
         Set<Long> processedIds = new HashSet<>();
 
@@ -168,14 +166,12 @@ public class TestController {
 
                         Answer answer;
                         if (answerId > 0) {
-                            // Existing answer - find and update it
                             answer = question.getAnswers().stream()
                                     .filter(a -> a.getId() == answerId)
                                     .findFirst()
                                     .orElseThrow(() -> new RuntimeException("Answer not found"));
                             answer.setContent(answerContent);
                         } else {
-                            // New answer - create it
                             answer = new Answer();
                             answer.setContent(answerContent);
                             answer.setQuestion(question);
@@ -184,25 +180,22 @@ public class TestController {
                         currentAnswers.add(answer);
                         processedIds.add(answerId);
                     } catch (NumberFormatException e) {
-                        System.out.println(("Invalid answer ID format: {}" + entry.getKey()));
+                        throw new RuntimeException("Invalid answer format");
                     }
                 });
 
-        // 3. Handle deleted answers
         if (deletedAnswers != null) {
             deletedAnswers.forEach(id -> {
-                if (id > 0) { // Only delete existing answers (positive IDs)
+                if (id > 0) {
                     question.getAnswers().removeIf(a -> a.getId() == id);
                 }
             });
         }
 
-        // 4. Update question
         question.setContent(questionContent);
         question.clearAndSetAnswers(currentAnswers);
         testRepository.save(test);
 
-        // 6. Handle redirect
         if (redirect != null && !redirect.isEmpty()) {
             return "redirect:" + redirect;
         }
@@ -217,10 +210,15 @@ public class TestController {
                     @PathVariable int questionNumber,
                     Model model,
                     Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum).get();
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum)
+                .orElseThrow(() -> new ResourceNotFoundException("Test not found"));
+
         Optional<Test> test = testRepository.findByLessonId(lesson.getId());
-        if (user.getCourses().contains(courseRepository.findById(courseId).get())) {
+        if (user.getCourses().contains(courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
             TestShowPage testShowPage = new TestShowPage();
 
             testShowPage.setTest(test.get());
@@ -244,7 +242,7 @@ public class TestController {
             User user = userRepository.findByUsername(principal.getName())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            if (user.getRole() != 1) {
+            if (!user.isAdmin()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 

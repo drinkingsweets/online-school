@@ -86,7 +86,7 @@
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
-        const spans = sidebar.querySelectorAll('nav a span.text-xs');
+        const spans = sidebar.querySelectorAll('a span.text-xs');
 
         // Determine current state: if sidebar is collapsed it has class w-16
         const isCollapsed = sidebar.classList.contains('w-16');

@@ -37,6 +37,7 @@ public class BaseController {
         for(Object[] object: topCourses) {
             System.out.println(object[0] + " " + object[1]);
         }
+
         for (int i = 0; i < Math.min(3, topCourses.size()); i++) {
             Object[] result = topCourses.get(i);
             Long courseId = (Long) result[0];
@@ -45,6 +46,7 @@ public class BaseController {
                 courses3.add(course);
             }
         }
+
         WelcomePage wp = new WelcomePage();
         wp.setCourses3(courses3);
         model.addAttribute("page", wp);
@@ -77,15 +79,16 @@ public class BaseController {
                         @RequestParam String passwordConfirmation, Model model) {
 
         boolean isUnique = userRepository.findByUsername(username).isEmpty();
-        if (password.equals(passwordConfirmation) && isUnique) { // checks if passwords match and username is unique
+        if (password.equals(passwordConfirmation) && isUnique) {
             User user = new User();
             user.setFullName(fullName);
             user.setUsername(username);
             user.setPasswordDigest(passwordEncoder.encode(password));
-            user.setRole(0); // sets the role to user
+            user.setRole(0);
             user.setPfpLink("https://i.pinimg.com/736x/8b/db/8e/8bdb8e8a536946dbe616ee509b7fb435.jpg");
             userRepository.save(user);
             return "redirect:/login";
+
         } else {
             RegisterLoginPage rlp = new RegisterLoginPage();
             if (!isUnique) rlp.addError("This username is taken");
@@ -100,7 +103,7 @@ public class BaseController {
     @GetMapping("/home")
     String home(Model model, Principal principal) {
         model.addAttribute("isAdmin",
-                userRepository.findByUsername(principal.getName()).get().getRole() == 1);
+                userRepository.findByUsername(principal.getName()).get().isAdmin());
         return "contents/buttons-welcome";
     }
 

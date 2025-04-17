@@ -30,12 +30,16 @@ public class CourseController {
 
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     private LessonRepository lessonRepository;
+
     @Autowired
     private MarkdownService markdownService;
+
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private TestRepository testRepository;
 
@@ -72,13 +76,12 @@ public class CourseController {
 
     @GetMapping("/{id}")
     String show(Model model, @PathVariable Long id, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (user.getRole() == 1) {
-            model.addAttribute("isAdmin", true);
-        } else {
-            model.addAttribute("isAdmin", false);
-        }
-        if (user.getCourses().contains(courseRepository.findById(id).get())) { // checking if course is added
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        model.addAttribute("isAdmin", user.isAdmin());
+
+        if (user.getCourses().contains(courseRepository.findById(id).get())) {
             model.addAttribute("isAdded", true);
         } else {
             model.addAttribute("isAdded", false);
@@ -89,12 +92,15 @@ public class CourseController {
 
     @PostMapping("/{id}/add")
     String addCourse(@PathVariable long id, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName()).get();
-        if (!user.getCourses().contains(courseRepository.findById(id).get())) { // adding if course is not added
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.getCourses().contains(courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
             user.getCourses().add(courseRepository.findById(id).get());
-            user.getCourseProgress().putIfAbsent(id, new User.CourseProgress()); // creating course progress
-            user.getCourseProgress().get(id).setFinished(false); // setting course as not finished
-            user.getCourseProgress().get(id).setCompletedLessons(1); // setting first lesson as progress
+            user.getCourseProgress().putIfAbsent(id, new User.CourseProgress());
+            user.getCourseProgress().get(id).setFinished(false);
+            user.getCourseProgress().get(id).setCompletedLessons(1);
         }
 
         userRepository.save(user);
@@ -103,21 +109,23 @@ public class CourseController {
 
     @GetMapping("/create")
     String createCourse(Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
-            return "contents/courses-create";
-        }
-        return "redirect:/courses";
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return user.checkIfAdminAndRedirectTo("contents/courses-create", "redirect:/courses");
     }
 
     @PostMapping("/create")
     String createCoursePost(@RequestParam String title,
                             @RequestParam String description,
                             Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+        if (userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()) {
             Course course = new Course();
             course.setTitle(title);
             course.setShortDescription(description);
-            courseRepository.save(course); // TODO maybe show blank page to write lessons?
+            courseRepository.save(course);
         }
         return "redirect:/courses";
     }
@@ -127,10 +135,12 @@ public class CourseController {
                       @PathVariable int lessonNum, Model model, Principal principal) {
         Lesson lesson;
 
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
-            Course course = courseRepository.findById(id).get();
+        if (userRepository.findByUsername(principal.getName()).get().isAdmin()) {
+            Course course = courseRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
             CourseEditPage cep = new CourseEditPage();
-            if (course.getLessons().isEmpty()) { // if empty, creating new empty lesson
+
+            if (course.getLessons().isEmpty()) {
                 lesson = new Lesson();
 
                 lesson.setTitle("Untitled");
@@ -175,8 +185,11 @@ public class CourseController {
                       @PathVariable int lessonNum,
                       @RequestParam String title,
                       @RequestParam String content, Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
-            Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNum).get();
+        if (userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()){
+            Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(id, lessonNum)
+                    .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
             lesson.setTitle(title);
             lesson.setContent(content);
             lessonRepository.save(lesson);
@@ -192,9 +205,12 @@ public class CourseController {
                          @PathVariable int lessonNum,
                          Principal principal,
                          Model model) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1) {
+        if (userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()) {
             PreviewPage pp = new PreviewPage();
-            pp.setLesson(lessonRepository.findByCourseIdAndLessonNumber(id, lessonNum).get());
+            pp.setLesson(lessonRepository.findByCourseIdAndLessonNumber(id, lessonNum)
+                    .orElseThrow(() -> new ResourceNotFoundException("Lesson not found")));
             pp.setMarkdownService(markdownService);
             model.addAttribute("page", pp);
             return "contents/courses-preview";
@@ -207,8 +223,12 @@ public class CourseController {
     String deleteLesson(@PathVariable long courseId,
                         @PathVariable int lessonNum,
                         Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 1 && lessonNum > 1) {
-            Course course = courseRepository.findById(courseId).get();
+        if (userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin() &&
+                lessonNum > 1) {
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
             Lesson lesson = lessonRepository.findByCourseIdAndLessonNumber(courseId, lessonNum)
                     .orElseThrow(() -> new RuntimeException("Lesson not found"));
@@ -236,11 +256,14 @@ public class CourseController {
     @PostMapping("/{id}/delete")
     @Transactional
     public String deleteCourse(@PathVariable long id, Principal principal) {
-        if (userRepository.findByUsername(principal.getName()).get().getRole() == 0) {
+        if (userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .isAdmin()) {
             return "redirect:/courses/" + id;
         }
 
-        Course course = courseRepository.findById(id).get();
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
         List<User> usersWithCourse = userRepository.findByCoursesContaining(course);
         for (User user : usersWithCourse) {
