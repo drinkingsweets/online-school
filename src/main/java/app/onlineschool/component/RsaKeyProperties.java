@@ -12,6 +12,9 @@ import java.security.interfaces.RSAPublicKey;
 @ConfigurationProperties(prefix = "rsa")
 @Setter
 @Getter
+/**
+ * Stores rsa keys
+ */
 public class RsaKeyProperties {
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;

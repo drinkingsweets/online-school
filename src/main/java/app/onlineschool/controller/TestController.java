@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.*;
 
+/**
+ * Full test CRUD
+ */
 @Controller
 @RequestMapping("/test")
 public class TestController {
@@ -37,8 +40,15 @@ public class TestController {
     @Autowired
     private CourseRepository courseRepository;
 
+    /**
+     * Creates a test
+     * @param courseId
+     * @param lessonNum
+     * @param principal
+     * @return redirect to first test question
+     */
     @GetMapping("/{courseId}/{lessonNum}/create")
-    String index(@PathVariable Long courseId, @PathVariable int lessonNum, Principal principal) {
+    public String index(@PathVariable Long courseId, @PathVariable int lessonNum, Principal principal) {
 
         if (!userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"))
@@ -75,8 +85,17 @@ public class TestController {
         return "redirect:/test/" + courseId + "/" + lessonNum + "/1/edit";
     }
 
+    /**
+     * Shows test page for editing
+     * @param courseId
+     * @param lessonNum
+     * @param questionNumber
+     * @param model
+     * @param principal
+     * @return test edit page
+     */
     @GetMapping("/{courseId}/{lessonNum}/{questionNumber}/edit")
-    String viewEdit(@PathVariable Long courseId,
+    public String viewEdit(@PathVariable Long courseId,
                     @PathVariable int lessonNum,
                     @PathVariable Integer questionNumber,
                     Model model,
@@ -134,6 +153,18 @@ public class TestController {
         return "contents/test-edit";
     }
 
+    /**
+     * Provides editing question
+     * @param courseId
+     * @param lessonNumber
+     * @param questionNumber
+     * @param questionContent
+     * @param allParams
+     * @param correctAnswers
+     * @param deletedAnswers
+     * @param redirect
+     * @return redirect to this question after saving or to next question/lesson
+     */
     @PostMapping("/{courseId}/{lessonNumber}/{questionNumber}/edit")
     public String handleEditQuestion(
             @PathVariable Long courseId,
@@ -203,9 +234,17 @@ public class TestController {
         return "redirect:/test/" + courseId + "/" + lessonNumber + "/" + questionNumber + "/edit";
     }
 
-
+    /**
+     * Shows test for a user
+     * @param courseId
+     * @param lessonNum
+     * @param questionNumber
+     * @param model
+     * @param principal
+     * @return user test page or redirect to /courses lesson
+     */
     @GetMapping("/{courseId}/{lessonNum}/{questionNumber}")
-    String viewTest(@PathVariable Long courseId,
+    public String viewTest(@PathVariable Long courseId,
                     @PathVariable int lessonNum,
                     @PathVariable int questionNumber,
                     Model model,
@@ -267,6 +306,11 @@ public class TestController {
         }
     }
 
+    /**
+     * Changes indexation of questions when some question is deleted
+     * @param testId
+     * @param deletedQuestionNumber
+     */
     private void reorderQuestionsAfterDeletion(long testId, int deletedQuestionNumber) {
         List<Question> questionsToReorder = questionRepository
                 .findByTestIdAndNumberInLessonGreaterThan(testId, deletedQuestionNumber);

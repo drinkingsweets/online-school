@@ -14,6 +14,9 @@ import java.util.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
+/**
+ * User entity with all info
+ */
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)

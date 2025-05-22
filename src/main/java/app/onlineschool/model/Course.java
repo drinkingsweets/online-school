@@ -11,6 +11,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Course entity that stores info about courses and includes lessons
+ */
 @Entity
 @Table(name = "courses")
 @EntityListeners(AuditingEntityListener.class)

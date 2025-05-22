@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+/**
+ * Transfers params to statistics page for charts
+ */
 @Getter
 @Setter
 @ToString

@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
+/**
+ * RUD of profile
+ */
 @Controller
 @RequestMapping("/profile")
 public class ProfileController {
@@ -20,8 +23,15 @@ public class ProfileController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Shows profile page
+     * @param model
+     * @param principal
+     * @param success success message for different operations
+     * @return profile page
+     */
     @GetMapping
-    String index(Model model, Principal principal,@RequestParam(value = "success", required = false) String success) {
+    public String index(Model model, Principal principal,@RequestParam(value = "success", required = false) String success) {
         ProfilePage pp = new ProfilePage();
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -35,8 +45,14 @@ public class ProfileController {
         return "contents/profile-page";
     }
 
+    /**
+     * Handles changing pfp
+     * @param principal
+     * @param link
+     * @return redirect to /profile
+     */
     @PostMapping("/picture_change")
-    String pictureChange(Principal principal, @RequestParam String link) {
+    public String pictureChange(Principal principal, @RequestParam String link) {
         User user = userRepository.findByUsername(principal.getName())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -46,7 +62,7 @@ public class ProfileController {
     }
 
     @PostMapping()
-    String passwordChange(Principal principal,
+    public String passwordChange(Principal principal,
                           @RequestParam String oldPassword,
                           @RequestParam String newPassword,
                           @RequestParam String newPasswordRepeat,
@@ -74,7 +90,7 @@ public class ProfileController {
     }
 
     @PostMapping("/delete")
-    String delete(Principal principal, @RequestParam String password) {
+    public String delete(Principal principal, @RequestParam String password) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -86,7 +102,7 @@ public class ProfileController {
     }
 
     @PostMapping("add_admin")
-    String addAdmin(@RequestParam String username, Principal principal) {
+    public String addAdmin(@RequestParam String username, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 

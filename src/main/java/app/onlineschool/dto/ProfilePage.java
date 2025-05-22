@@ -4,6 +4,9 @@ import app.onlineschool.model.User;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Transfers params to user profile page
+ */
 @Getter
 @Setter
 public class ProfilePage {

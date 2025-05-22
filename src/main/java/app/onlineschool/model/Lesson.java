@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/**
+ * Lesson entity that connects to courses
+ */
 @Entity
 @Table(name = "lessons")
 @Getter
@@ -19,7 +22,7 @@ public class Lesson {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false) // Explicitly define the foreign key column
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     @NotBlank

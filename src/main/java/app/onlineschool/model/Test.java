@@ -7,6 +7,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.List;
 
+/**
+ * Test entity that includes questions
+ */
 @Entity
 @Table(name = "tests")
 @Getter

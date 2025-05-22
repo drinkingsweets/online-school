@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * Transfers three most popular courses to welcome("/") page
+ */
 @Getter
 @Setter
 public class WelcomePage {

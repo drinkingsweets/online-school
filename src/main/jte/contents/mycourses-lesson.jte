@@ -22,6 +22,7 @@ content = @`
         </section>
 
         <!-- Navigation Buttons -->
+        @if(page.getLesson().getLessonNumber() > 1)
         <div class="flex justify-between">
             <form action="/mycourses/${page.getLesson().getCourse().getId()}/${page.getLesson().getLessonNumber() - 1}" method="post">
                 <button type="submit"
@@ -29,6 +30,7 @@ content = @`
                     Back
                 </button>
             </form>
+            @endif
 
             @if(!page.isHasTest())
             <form action="/mycourses/${page.getLesson().getCourse().getId()}/next${page.getLessonNum().isEmpty() ? "":"?lessonNum=" + page.getLessonNum()}" method="post">

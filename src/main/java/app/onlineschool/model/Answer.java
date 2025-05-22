@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/**
+ * Answers entity which connects to question entity
+ */
 @Entity
 @Table(name = "answers")
 @Getter

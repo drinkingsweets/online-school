@@ -30,7 +30,7 @@ public class StatisticsController {
     LessonRepository lessonRepository;
 
     @GetMapping
-    String index(Model model, Principal principal) {
+   public  String index(Model model, Principal principal) {
         StatisticsPage sp = new StatisticsPage();
 
         User user = userRepository.findByUsername(principal.getName())

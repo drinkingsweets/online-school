@@ -82,7 +82,7 @@
                 </a>
             </div>
             <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl">
-                <a href="/us">
+                <a href="/about">
                 <div
                         class="bg-orange-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1"
                 >
@@ -94,16 +94,19 @@
                 <div
                         class="bg-orange-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1"
                 >
+                    <a href="/courses">
                     <span class="material-symbols-outlined text-4xl text-orange-500 mb-3">search</span>
                     <h3 class="text-lg font-semibold mb-2 text-gray-800">Search Courses</h3>
                     <p class="text-gray-600">Find the perfect course for your needs</p>
+                    </a>
                 </div>
                 <div
                         class="bg-orange-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1"
-                >
+                > <a href="https://github.com/drinkingsweets">
                     <span class="material-symbols-outlined text-4xl text-orange-500 mb-3">forum</span>
                     <h3 class="text-lg font-semibold mb-2 text-gray-800">Community</h3>
                     <p class="text-gray-600">Join our student community forum</p>
+                    </a>
                 </div>
             </div>
         </main>

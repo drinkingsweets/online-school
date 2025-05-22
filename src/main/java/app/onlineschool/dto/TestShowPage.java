@@ -4,6 +4,9 @@ import app.onlineschool.model.Test;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Transfers params to test show page
+ */
 @Getter
 @Setter
 public class TestShowPage {

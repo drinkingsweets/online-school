@@ -6,6 +6,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Transfers params to register page
+ */
 @Getter
 @Setter
 public class RegisterLoginPage {

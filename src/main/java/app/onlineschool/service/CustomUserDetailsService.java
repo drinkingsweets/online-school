@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Handles custom user CRUD
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsManager {
 

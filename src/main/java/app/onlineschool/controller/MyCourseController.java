@@ -19,6 +19,9 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Optional;
 
+/**
+ * Handles user added courses
+ */
 @Controller
 @RequestMapping("/mycourses")
 public class MyCourseController {
@@ -36,8 +39,14 @@ public class MyCourseController {
     @Autowired
     private TestRepository testRepository;
 
+    /**
+     * Shows courses that user added
+     * @param model
+     * @param principal
+     * @return all courses that user added
+     */
     @GetMapping
-    String index(Model model, Principal principal) {
+    public String index(Model model, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         model.addAttribute("courses", user.getCourses());
@@ -45,8 +54,16 @@ public class MyCourseController {
         return "contents/mycourses-buttons";
     }
 
+    /**
+     * Shows lesson
+     * @param model
+     * @param id
+     * @param principal
+     * @param redirectToLesson
+     * @return lesson page
+     */
     @GetMapping("/{id}")
-    String show(Model model, @PathVariable Long id, Principal principal,
+    public String show(Model model, @PathVariable Long id, Principal principal,
                 @RequestParam(name = "lessonNum", required = false) String redirectToLesson) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -88,8 +105,15 @@ public class MyCourseController {
         return "redirect:/courses" + id;
     }
 
+    /**
+     * Handles transition to next lesson
+     * @param id
+     * @param redirectToLesson
+     * @param principal
+     * @return next lesson
+     */
     @PostMapping("/{id}/next")
-    String nextLesson(@PathVariable long id,
+    public String nextLesson(@PathVariable long id,
                       @RequestParam(name = "lessonNum", required = false) String redirectToLesson,
                       Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
@@ -121,8 +145,15 @@ public class MyCourseController {
         return "redirect:/courses/" + id;
     }
 
+    /**
+     * Shows finish page
+     * @param id
+     * @param principal
+     * @param model
+     * @return finish page
+     */
     @GetMapping("/{id}/finished")
-    String finishPage(@PathVariable Long id, Principal principal, Model model) {
+    public String finishPage(@PathVariable Long id, Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (user.getCourses().contains(courseRepository.findById(id)
@@ -134,8 +165,15 @@ public class MyCourseController {
         return "redirect:/courses/" + id;
     }
 
+    /**
+     * Handles going on different lessons without changing completedLessons variable
+     * @param id
+     * @param lessonNum
+     * @param principal
+     * @return redirect to lesson
+     */
     @PostMapping("/{id}/{lessonNum}")
-    String gotoLesson(@PathVariable long id,
+    public String gotoLesson(@PathVariable long id,
                       @PathVariable long lessonNum,
                       Principal principal) {
         User user = userRepository.findByUsername(principal.getName())

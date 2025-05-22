@@ -157,37 +157,37 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="title">Sign up</div>
-        @if (!page.getErrors().isEmpty())
-            <div class="error-messages">
-                <ul>
-                    @for (String error : page.getErrors())
-                        <li>${error}</li>
-                    @endfor
-                </ul>
-            </div>
-        @endif
-        <form method="post" action="/register">
-            <div class="form-group">
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" name="fullName" value = "${page.getFullName()}" required>
-            </div>
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="passwordConfirmation" name="passwordConfirmation" required>
-            </div>
-            <button type="submit" class="button">Sign up</button>
-        </form>
-        <a href="/login" class="link">Already have an account? Login here</a>
-    </div>
+<div class="container">
+    <div class="title">Sign up</div>
+    @if (!page.getErrors().isEmpty())
+        <div class="error-messages">
+            <ul>
+                @for (String error : page.getErrors())
+                    <li>${error}</li>
+                @endfor
+            </ul>
+        </div>
+    @endif
+    <form method="post" action="/register">
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" value="${page.getFullName() != null ? page.getFullName() : ""}" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="${page.getUsername() != null ? page.getUsername() : ""}" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="passwordConfirmation">Confirm Password</label>
+            <input type="password" id="passwordConfirmation" name="passwordConfirmation" required>
+        </div>
+        <button type="submit" class="button">Sign up</button>
+    </form>
+    <a href="/login" class="link">Already have an account? Login here</a>
+</div>
 </body>
 </html>

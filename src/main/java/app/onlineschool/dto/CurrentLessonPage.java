@@ -5,6 +5,9 @@ import app.onlineschool.model.Test;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Transfers params to user view lesson page
+ */
 @Getter
 @Setter
 public class CurrentLessonPage {

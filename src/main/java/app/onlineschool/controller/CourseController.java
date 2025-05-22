@@ -22,6 +22,9 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Handles all course CRUD + adding to mycourse
+ */
 @Controller
 @RequestMapping("/courses")
 public class CourseController {
@@ -43,14 +46,27 @@ public class CourseController {
     @Autowired
     private TestRepository testRepository;
 
+    /**
+     * Shows all courses
+     * @param model
+     * @return courses jte page
+     */
     @GetMapping
-    String index(Model model) {
+    public String index(Model model) {
         model.addAttribute("courses", courseRepository.findAll());
         return "page/courses";
     }
 
+    /**
+     * Handles courses search
+     * @param query String query to search
+     * @param startDate start date for interval when course is created
+     * @param endDate end date for interval when course is created
+     * @param model
+     * @return courses jte page
+     */
     @PostMapping
-    String search(@RequestParam(required = false) String query,
+    public String search(@RequestParam(required = false) String query,
                   @RequestParam(required = false) LocalDate startDate,
                   @RequestParam(required = false) LocalDate endDate,
                   Model model) {
@@ -74,14 +90,21 @@ public class CourseController {
         return "page/courses";
     }
 
+    /**
+     * Shows current lesson of course
+     * @param model
+     * @param id course id to show
+     * @param principal
+     * @return course jte page
+     */
     @GetMapping("/{id}")
-    String show(Model model, @PathVariable Long id, Principal principal) {
+    public String show(Model model, @PathVariable Long id, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         model.addAttribute("isAdmin", user.isAdmin());
 
-        if (user.getCourses().contains(courseRepository.findById(id).get())) {
+        if (user.getCourses().contains(courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found")))) {
             model.addAttribute("isAdded", true);
         } else {
             model.addAttribute("isAdded", false);
@@ -90,8 +113,14 @@ public class CourseController {
         return "page/course";
     }
 
+    /**
+     * Handles user adding course
+     * @param id course id to add
+     * @param principal
+     * @return redirect to /courses/{id}
+     */
     @PostMapping("/{id}/add")
-    String addCourse(@PathVariable long id, Principal principal) {
+    public String addCourse(@PathVariable long id, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -107,16 +136,28 @@ public class CourseController {
         return "redirect:/courses/" + id;
     }
 
+    /**
+     * Creates a course
+     * @param principal
+     * @return redirects to /courses if not admin, else shows courses-create jte page
+     */
     @GetMapping("/create")
-    String createCourse(Principal principal) {
+    public String createCourse(Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return user.checkIfAdminAndRedirectTo("contents/courses-create", "redirect:/courses");
     }
 
+    /**
+     * Handles course creation
+     * @param title
+     * @param description
+     * @param principal
+     * @return redirect to /courses
+     */
     @PostMapping("/create")
-    String createCoursePost(@RequestParam String title,
+    public String createCoursePost(@RequestParam String title,
                             @RequestParam String description,
                             Principal principal) {
         if (userRepository.findByUsername(principal.getName())
@@ -130,8 +171,16 @@ public class CourseController {
         return "redirect:/courses";
     }
 
+    /**
+     * Shows user interface for updating lesson
+     * @param id course id
+     * @param lessonNum
+     * @param model
+     * @param principal
+     * @return courses edit page if admin, else redirect to /courses
+     */
     @GetMapping("/{id}/{lessonNum}/edit")
-    String editCourse(@PathVariable long id,
+    public String editCourse(@PathVariable long id,
                       @PathVariable int lessonNum, Model model, Principal principal) {
         Lesson lesson;
 
@@ -180,8 +229,17 @@ public class CourseController {
         return "redirect:/courses";
     }
 
+    /**
+     * Handles updating lesson
+     * @param id course id
+     * @param lessonNum
+     * @param title
+     * @param content
+     * @param principal
+     * @return redirect to preview page if admin, else to /courses
+     */
     @PostMapping("/{id}/{lessonNum}/edit")
-    String saveLesson(@PathVariable long id,
+    public String saveLesson(@PathVariable long id,
                       @PathVariable int lessonNum,
                       @RequestParam String title,
                       @RequestParam String content, Principal principal) {
@@ -200,8 +258,16 @@ public class CourseController {
         return "redirect:/courses";
     }
 
+    /**
+     * Shows lesson preview
+     * @param id
+     * @param lessonNum
+     * @param principal
+     * @param model
+     * @return lesson preview page if admin, else redirect to /courses
+     */
     @GetMapping("/{id}/{lessonNum}/preview")
-    String previewLesson(@PathVariable long id,
+    public String previewLesson(@PathVariable long id,
                          @PathVariable int lessonNum,
                          Principal principal,
                          Model model) {
@@ -218,9 +284,10 @@ public class CourseController {
         return "redirect:/courses/" + id + "/" + lessonNum;
     }
 
+
     @PostMapping("/{courseId}/{lessonNum}/delete")
     @Transactional
-    String deleteLesson(@PathVariable long courseId,
+    public String deleteLesson(@PathVariable long courseId,
                         @PathVariable int lessonNum,
                         Principal principal) {
         if (userRepository.findByUsername(principal.getName())
@@ -252,6 +319,7 @@ public class CourseController {
         }
         return "redirect:/courses/" + courseId + "/" + (lessonNum - 1) + "/edit";
     }
+
 
     @PostMapping("/{id}/delete")
     @Transactional

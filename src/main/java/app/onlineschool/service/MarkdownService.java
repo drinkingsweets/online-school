@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
+/**
+ * Parses Markdown(stores in DB) to HTML
+ */
 @Service
 public class MarkdownService {
 
