@@ -24,9 +24,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     List<Course> findByCreatedAtBefore(LocalDate endDate);
 
-    @Query("SELECT c.title FROM Course c")
-    List<String> findAllCourseNames();
-
     // New method to count courses created in a given month.
     @Query("SELECT COUNT(c) FROM Course c WHERE EXTRACT(MONTH FROM c.createdAt) = ?1")
     Integer countCoursesByMonth(int month);
